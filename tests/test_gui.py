@@ -22,6 +22,8 @@ api(U,'GetWindowThreadProcessId',[T.HWND,C.POINTER(T.DWORD)],T.DWORD)
 api(U,'PostMessageW',[T.HWND,T.UINT,T.WPARAM,T.LPARAM],T.BOOL)
 api(U,'SendMessageW',[T.HWND,T.UINT,T.WPARAM,T.LPARAM],T.LPARAM)
 api(U,'GetClientRect',[T.HWND,C.POINTER(T.RECT)],T.BOOL)
+api(U,'GetWindowRect',[T.HWND,C.POINTER(T.RECT)],T.BOOL)
+api(U,'SetWindowPos',[T.HWND,T.HWND,C.c_int,C.c_int,C.c_int,C.c_int,T.UINT],T.BOOL)
 api(U,'GetDC',[T.HWND],T.HDC);api(U,'ReleaseDC',[T.HWND,T.HDC],C.c_int)
 api(U,'PrintWindow',[T.HWND,T.HDC,T.UINT],T.BOOL)
 api(U,'GetGuiResources',[T.HANDLE,T.DWORD],T.DWORD)
@@ -72,8 +74,16 @@ try:
     def key(vk,lparam=1):
         assert U.PostMessageW(hwnd,0x100,vk,lparam)
     check(until(lambda:struct.unpack('<Q',read('draw_dc',8))[0]!=0),'double-buffer drawing resources initialize')
-    rect=T.RECT();assert U.GetClientRect(hwnd,C.byref(rect))
-    check((rect.right,rect.bottom)==(800,800),'window client area is exactly 800 x 800')
+    rect=T.RECT();outer=T.RECT()
+    assert U.GetClientRect(hwnd,C.byref(rect)) and U.GetWindowRect(hwnd,C.byref(outer))
+    # Hosted Windows desktops can clamp the initial window below our fixed canvas.
+    # Size ONLY this hidden test window, not the user's desktop or display settings.
+    # NOSENDCHANGING avoids the default track-size clamp; NOACTIVATE keeps it hidden.
+    border_w=(outer.right-outer.left)-(rect.right-rect.left)
+    border_h=(outer.bottom-outer.top)-(rect.bottom-rect.top)
+    assert U.SetWindowPos(hwnd,None,0,0,800+border_w,800+border_h,0x0416),C.get_last_error()
+    assert U.GetClientRect(hwnd,C.byref(rect))
+    check((rect.right,rect.bottom)==(800,800),f'test viewport is exactly 800 x 800 (got {rect.right} x {rect.bottom})')
     key(0x52);check(until(lambda:state('paused')==0 and not any(read('board',200))),'R starts a fresh game')
     x=state('x');key(0x25);check(until(lambda:state('x')==x-1),'left key moves active piece')
     old=state('rotation');key(0x26);check(until(lambda:state('rotation')==(old+1)%4),'up key rotates active piece')

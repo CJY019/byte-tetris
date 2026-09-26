@@ -1,11 +1,11 @@
-# BYTE TETRIS
+# astra制作的机器码俄罗斯方块
 
 **13.5 KiB · Windows x64 · 手工编码机器指令 · 单文件图形游戏**
 
 A hand-encoded Windows x64 falling-block game. The entire graphical game fits in a
 13,824-byte native EXE, with no compiler toolchain or packaged language runtime.
 
-![BYTE TETRIS](assets/screenshot.png)
+![astra制作的机器码俄罗斯方块](assets/screenshot.png)
 
 ## 这是什么？
 
@@ -29,6 +29,7 @@ Python 不在成品中，也不参与游戏运行。本项目在 AI 辅助下完
 只需这一个文件，不需要下载源码、安装 Python 或放置资源文件。
 
 目标环境：Windows 10/11 x64；已在 Windows 11 x64 验证。不是跨平台可执行文件。
+界面采用固定 800×800 客户区，建议桌面高度至少 900 像素；低分辨率环境可能裁切窗口。
 这是未签名的实验程序；不确定来源时请先审阅源码并自行构建，不必关闭系统安全功能。
 
 | 按键 | 操作 |
