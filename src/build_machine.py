@@ -393,7 +393,7 @@ exe=ROOT/'TetrisMachine.exe';exe.write_bytes(image)
 manifest=dict(size=len(image),sha256=hashlib.sha256(image).hexdigest(),size_image=size_image,entry=labels['entry'],labels=labels,
               imports=apis,api_dll=API_DLL,sections=manifest_sections,functions=c.functions,code_bytes=len(c.buf),
               client_width=CW,client_height=CH,shapes=shapes,brush_count=len(ALL_COLORS))
-(ROOT/'docs'/'machine-map.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8')
+(ROOT/'docs'/'machine-map.json').write_text(json.dumps(manifest,indent=2)+'\n',encoding='utf-8',newline='\n')
 # Exact byte listing, respecting label boundaries.
 by_offset={}
 for name,off in c.labels.items():by_offset.setdefault(off,[]).append(name)
@@ -402,6 +402,6 @@ listing=[]
 for a,b in zip(boundaries,boundaries[1:]):
     for name in by_offset.get(a,[]):listing.append('\n'+name+':')
     listing.append(f'{text_rva+a:08X}  '+c.buf[a:b].hex(' ').upper())
-(ROOT/'docs'/'machine-code.hex').write_text('\n'.join(listing)+'\n',encoding='ascii')
+(ROOT/'docs'/'machine-code.hex').write_text('\n'.join(listing)+'\n',encoding='ascii',newline='\n')
 print(f'Wrote {exe}\n{len(image):,} bytes; {len(c.buf):,} instruction bytes; {len(c.functions)} functions')
 print('System DLL imports: '+', '.join(DLLS));print('SHA256: '+manifest['sha256'])
