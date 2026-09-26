@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+/.artifacts/
+/*.exe
+/SHA256SUMS.txt
+/全部字节.txt
+/*.hex.txt
+Thumbs.db
+.DS_Store

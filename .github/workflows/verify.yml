@@ -1,0 +1,35 @@
+name: Native machine-code checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Build with the runner's Python (no packages to install)
+        shell: pwsh
+        run: |
+          python --version
+          python src/build_machine.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $expected = 'B9298C23D51C633AB9E2A72742FABF499F82D268DAC4397C9D46F6DF1E793F40'
+          $actual = (Get-FileHash ./TetrisMachine.exe -Algorithm SHA256).Hash
+          if ($actual -ne $expected) { throw "Executable bytes changed; review and update the documented hash." }
+          git diff --exit-code -- docs/machine-code.hex docs/machine-map.json
+      - name: Verify actual machine instructions
+        shell: pwsh
+        run: python tests/test_machine.py
+      - name: Exercise the native window and keyboard
+        shell: pwsh
+        run: python tests/test_gui.py
